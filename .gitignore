@@ -1,0 +1,10 @@
+.vs/
+packages/
+*.sln
+
+Test_OpenGL/x64/
+
+*packages.config
+*Test_OpenGL.vcxproj
+*Test_OpenGL.vcxproj.filters
+*Test_OpenGL.vcxproj.user
