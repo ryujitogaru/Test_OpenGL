@@ -16,7 +16,6 @@ void PlayScene::Update() {
 
 	glPushMatrix();
 
-	//glTranslatef(0.1f, 0.0f, 0.0f);
 	glTranslatef(xpos, ypos, 0.0f);
 
 	// 座標
@@ -26,7 +25,6 @@ void PlayScene::Update() {
 	// サイズ
 	glPointSize(40.0f);
 	// 色
-	glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
 
 	static const GLfloat vtx2[] = { 320, 340 };
 	// 座標の設定
@@ -34,7 +32,6 @@ void PlayScene::Update() {
 	// サイズ
 	glPointSize(40.0f);
 	// 色
-	glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
 
 
 	glEnableClientState(GL_VERTEX_ARRAY);

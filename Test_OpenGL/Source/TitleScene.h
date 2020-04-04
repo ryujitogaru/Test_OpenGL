@@ -4,7 +4,9 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
-class TitleScene {
+#include "Scene.h"
+
+class TitleScene : Scene {
 
 public:
 	// コンストラクタ
@@ -13,10 +15,6 @@ public:
 	~TitleScene();
 
 	void Update();
-
-	void render();
-	void setupTexture(GLuint, const char*);
-
 private:
 };
 

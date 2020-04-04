@@ -1,108 +1,92 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "TitleScene.h"
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
-#include "opencv2/opencv.hpp"
 
-#include "Sprite.h"
+#include "opencv2/opencv.hpp"
+#include "Sprite2D.h"
 
 GLuint g_texID[2];
+std::vector<Sprite2D> splist;
+
+#define XLEN 72
+#define YLEN 56
+
+// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿ã®ä½¿ç”¨ã™ã‚‹ç¯„å›²ã‚’æŒ‡å®š
+// ç”»é¢å·¦ä¸ŠãŒåŸç‚¹(0,0)ã€€å·¦ä¸‹ã‹ã‚‰åæ™‚è¨ˆå›ã‚Šã«é ˜åŸŸæŒ‡å®š
+const GLfloat whblock[] = {
+	0.0f, 0.2f,
+	0.1f, 0.2f,
+	0.1f, 0.1f,
+	0.0f, 0.1f,
+};
+const GLfloat bkblock[] = {
+	0.1f, 0.2f,
+	0.2f, 0.2f,
+	0.2f, 0.1f,
+	0.1f, 0.1f,
+};
+
 /*
-	glBindTexture‚Ì“®ì‚Íd‚¢‚ç‚µ‚¢‚Ì‚ÅA
-	ƒeƒNƒXƒ`ƒƒƒAƒgƒ‰ƒXi1–‡‚Ì‰æ‘œƒtƒ@ƒCƒ‹‚É•¡”‚ÌŠG‚ğ‚­‚Á‚Â‚¯Ø‚èæ‚éj‚ğì¬‚µA
-	1‰ñ‚¾‚¯ŠÖ”‚ğŒÄ‚Ño‚·‚æ‚¤‚É‚µ‚½‚ç‚‘¬‰»‚ª}‚ê‚é
+	glBindTextureã®å‹•ä½œã¯é‡ã„ã‚‰ã—ã„ã®ã§ã€
+	ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚¢ãƒˆãƒ©ã‚¹ï¼ˆ1æšã®ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã«è¤‡æ•°ã®çµµã‚’ãã£ã¤ã‘åˆ‡ã‚Šå–ã‚Šä½¿ç”¨ï¼‰ã‚’ä½œæˆã—ã€
+	1å›ã ã‘é–¢æ•°ã‚’å‘¼ã³å‡ºã™ã‚ˆã†ã«ã—ãŸã‚‰é«˜é€ŸåŒ–ãŒå›³ã‚Œã‚‹
+
+	ã•ã‚‰ã«glDrawArayysã‚’å‘¼ã³å‡ºã™å›æ•°ã‚’æ¸›ã‚‰ã™ã¨ã•ã‚‰ã«é«˜é€ŸåŒ–ã§ãã‚‹
+	(å‹•ãã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãªã©ã¯ä¾‹å¤–ã ã¨ã‹ã€‚èƒŒæ™¯ãªã©ã®å‹•ã‹ãªã„ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆé™å®šã§ã‚„ã‚‹ã¹ãã‹ã€‚)
 */
 
-float posx = 0;
-
 //------------------------------------------------------------------------------
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 //------------------------------------------------------------------------------
 TitleScene::TitleScene() {
-	// Step1. ƒeƒNƒXƒ`ƒƒ‚Ìƒ[ƒh
-	glGenTextures(2, g_texID);
-	setupTexture(g_texID[0], "Resources/Impling.png");
-	setupTexture(g_texID[1], "Resources/SAMPLE.png");
+	Init();
+	int xlen = XLEN;
+	int ylen = YLEN;
+	int map[YLEN][XLEN] = {
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+		{0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	};
+
+	for (int y = 0; y < ylen; y++) {
+		for (int x = 0; x < xlen; x++) {
+			float xpos = 48;
+			float ypos = 24;
+			int size = 48;
+
+			Sprite2D* sprite = new Sprite2D(GetTexID());
+			sprite->TexutreLoad("OpenGL_Test.png");
+			if (map[(ylen - 1) - y][(xlen - 1) - x] == 0) {
+				sprite->SetTexUV(bkblock);
+			}
+			else
+			{
+				sprite->SetTexUV(whblock);
+			}
+			sprite->SetPosition(xpos + (size * x), ypos + (size * y));
+			sprite->SetSize(size, size);
+			sprite->Create();
+			splist.push_back(*sprite);
+
+		}
+	}
 }
 
 TitleScene::~TitleScene() {
-
+	
 }
 
 void TitleScene::Update() {
-
-	render();
-	glTranslatef(0.05f, 0, 0);
-	//glRotatef(0.1f, 0.0f, 0.0f, 1.0f);
-	//posx += 0.05f;
-	
-}
-
-void TitleScene::render(){
-	// Step5. ƒeƒNƒXƒ`ƒƒ‚Ì•\¦—Ìˆæ‚ğÀ•W‚Åw’è
-	// ‰æ–Ê¶‰º‚ªŒ´“_@Œ´“_‚©‚ç”½Œv‰ñ‚è‚É—Ìˆæw’è
-	static const GLfloat vtx[] = {
-		-100, -100,
-		 100, -100,
-		 100,  100,
-		-100,  100,
-	};
-	glVertexPointer(2, GL_FLOAT, 0, vtx);
-
-	// ƒeƒNƒXƒ`ƒƒƒf[ƒ^‚Ìg—p‚·‚é”ÍˆÍ‚ğw’è
-	// ‰æ–Ê¶ã‚ªŒ´“_@¶‰º‚©‚ç”½Œv‰ñ‚è‚É—Ìˆæw’è
-	static const GLfloat texuv[] = {
-		0.0f, 1.0f,
-		1.0f, 1.0f,
-		1.0f, 0.0f,
-		0.0f, 0.0f,
-	};
-	glTexCoordPointer(2, GL_FLOAT, 0, texuv);
-
-	// Step6. ƒeƒNƒXƒ`ƒƒ‚Ì‰æ‘œw’è
-	//glBindTexture(GL_TEXTURE_2D, g_texID);
-
-	// Step7. ƒeƒNƒXƒ`ƒƒ‚Ì•`‰æ
-	glEnable(GL_BLEND); // “§‰ß‰æ‘œ—p
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // “§‰ß‰æ‘œ—p
-	glEnable(GL_TEXTURE_2D);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	// 1–‡–Ú‚Ì‰æ‘œ
-	glPushMatrix();
-	glBindTexture(GL_TEXTURE_2D, g_texID[0]);
-	glTranslatef(100, 100, 0);
-	glDrawArrays(GL_QUADS, 0, 4);
-	glPopMatrix();
-
-	// 2–‡–Ú‚Ì‰æ‘œ
-	glPushMatrix();
-	glBindTexture(GL_TEXTURE_2D, g_texID[1]);
-	glTranslatef(100, 300, 0);
-	glDrawArrays(GL_QUADS, 0, 4);
-	glPopMatrix();
-	
-
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisable(GL_TEXTURE_2D);
-}
-
-void TitleScene::setupTexture(GLuint texID, const char *file)
-{
-	// Step2. ‰æ‘œƒf[ƒ^‚Ìƒ[ƒh
-	cv::Mat img = cv::imread(file, cv::IMREAD_UNCHANGED);
-	cv::cvtColor(img, img, cv::COLOR_BGRA2RGBA);
-	
-	// Step3. ‰æ‘œƒf[ƒ^‚ÆƒeƒNƒXƒ`ƒƒiD‚ğŒ‹‚Ñ‚Â‚¯‚é
-	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.cols, img.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, img.data);
-
-	// Step4. ƒeƒNƒXƒ`ƒƒ‚ÌŠeíİ’è
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
+	Render(splist);
+	//glTranslatef(0.05f, 0, 0);
 }
